@@ -2,7 +2,7 @@ import sys
 import pygame as p
 import random
 import math
-import example
+import ashborer
 
 dir = "valley_resources/"
 size = (width,height) = 640,480
@@ -201,7 +201,7 @@ class Scene():
 						if event.key == p.K_SPACE: self.pause = False
 
 			while self.example:
-				s = example.Scene(self.screen)
+				s = ashborer.Scene(self.screen)
 				s.run()
 				self.example = False
 				
@@ -209,7 +209,6 @@ class Scene():
 			#self.screen.blit(background, backgroundRect)
 			
 			self.draw()
-	    
 			if p.font:
 				bigfont = p.font.SysFont("Arial", 32, True, False)
 				lilfont = p.font.SysFont("Arial", 18, False, False)
@@ -224,9 +223,8 @@ class Scene():
 				#self.screen.blit(hiscore, [cornerwidth,cornerheight+35])
 				
 			p.display.flip()
-	    
 			self.update()
-    
+			
 	def reset(self):
 		self.moveSpeed = 3.0
 		self.ticks = 0
