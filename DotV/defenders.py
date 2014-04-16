@@ -1,10 +1,8 @@
 import sys
 import pygame as p
-import random
-import math
 import ashborer
 
-dir = "valley_resources/"
+resdir = "valley_resources/"
 size = (width,height) = 640,480
 black = 0,0,0
 run = 1
@@ -38,9 +36,9 @@ tileArray = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 class Player(p.sprite.Sprite):
 	def __init__(self):
 		p.sprite.Sprite.__init__(self)
-		self.leftFoot = p.image.load(dir+"defenderLeft.png")
-		self.rightFoot = p.image.load(dir+"defenderRight.png")
-		self.standing = p.image.load(dir+"defenderStand.png")
+		self.leftFoot = p.image.load(resdir+"defenderLeft.png")
+		self.rightFoot = p.image.load(resdir+"defenderRight.png")
+		self.standing = p.image.load(resdir+"defenderStand.png")
 		self.img = self.standing
 		self.imgRect = self.img.get_rect()
 		self.moving = False
@@ -51,9 +49,9 @@ class Player(p.sprite.Sprite):
 		screen.blit(self.img, self.imgRect)
 
 	def resetImage(self, direction):
-		self.leftFoot = p.image.load(dir+"defenderLeft.png")
-		self.rightFoot = p.image.load(dir+"defenderRight.png")
-		self.standing = p.image.load(dir+"defenderStand.png")
+		self.leftFoot = p.image.load(resdir+"defenderLeft.png")
+		self.rightFoot = p.image.load(resdir+"defenderRight.png")
+		self.standing = p.image.load(resdir+"defenderStand.png")
 		if direction == "left": self.setImageDirection(90)
 		elif direction =="right": self.setImageDirection(270)
 		elif direction =="down": self.setImageDirection(180)
@@ -87,12 +85,12 @@ class Player(p.sprite.Sprite):
 
 
 class Tile(p.sprite.Sprite):
-	def __init__(self, type, x, y):
-		self.grass = p.image.load(dir+"grass.png")
-		self.dirt = p.image.load(dir+"dirt.png")
+	def __init__(self, tileType, x, y):
+		self.grass = p.image.load(resdir+"grass.png")
+		self.dirt = p.image.load(resdir+"dirt.png")
 		p.sprite.Sprite.__init__(self)
 		self.pos = [x,y]
-		if (type == 0): self.img = self.grass
+		if (tileType == 0): self.img = self.grass
 		else: self.img = self.dirt
 		self.imgRect = self.img.get_rect()
 		
@@ -124,12 +122,12 @@ class Scene():
 		self.example = False
 		self.suspended = False
 		self.last_move = "up"
-		self.movespeed = 3.0
-		'''
-		background = p.image.load(dir+"grass.png")
-		background = p.transform.scale(background, (width,height))
-		backgroundRect = background.get_rect()
-		'''
+		self.movespeed = 8
+
+# 		background = p.image.load(resdir+"grass.png")
+# 		background = p.transform.scale(background, (width,height))
+# 		backgroundRect = background.get_rect()
+
 		self.player = Player()
 		
 		self.screen = p.display.set_mode(size)
@@ -191,7 +189,7 @@ class Scene():
 						self.last_move = "down"
 					elif event.key == p.K_ESCAPE: self.pause = True
 					elif event.key == p.K_TAB: self.example = True
-					  
+					
 			while self.pause:
 				lines = [" - PAUSED - "," Press space to resume. "]
 				self.message(lines, p.font.SysFont("Arial", 28, False, False))
@@ -209,24 +207,24 @@ class Scene():
 			#self.screen.blit(background, backgroundRect)
 			
 			self.draw()
-			if p.font:
-				bigfont = p.font.SysFont("Arial", 32, True, False)
-				lilfont = p.font.SysFont("Arial", 18, False, False)
-				#level = bigfont.render("Level: "+str(self.level), 1, (238, 221, 130))
-				#score = bigfont.render("Score: "+str(self.score), 1, (255, 255, 255))
-				#hiscore = lilfont.render("Hiscore: "+str(self.hiscore), 1, (255, 255, 255))
-		
-				(cornerwidth, cornerheight) = [10,5]
-		
-				#self.screen.blit(level, [width-135,height-50])
-				#self.screen.blit(score, [cornerwidth,cornerheight])
-				#self.screen.blit(hiscore, [cornerwidth,cornerheight+35])
+# 			if p.font:
+# 				bigfont = p.font.SysFont("Arial", 32, True, False)
+# 				lilfont = p.font.SysFont("Arial", 18, False, False)
+# 				level = bigfont.render("Level: "+str(self.level), 1, (238, 221, 130))
+# 				score = bigfont.render("Score: "+str(self.score), 1, (255, 255, 255))
+# 				hiscore = lilfont.render("Hiscore: "+str(self.hiscore), 1, (255, 255, 255))
+#    		
+# 				(cornerwidth, cornerheight) = [10,5]
+#    		
+# 				self.screen.blit(level, [width-135,height-50])
+# 				self.screen.blit(score, [cornerwidth,cornerheight])
+# 				self.screen.blit(hiscore, [cornerwidth,cornerheight+35])
 				
 			p.display.flip()
 			self.update()
 			
 	def reset(self):
-		self.moveSpeed = 3.0
+		self.moveSpeed = 3
 		self.ticks = 0
 		self.moving_left = False
 		self.moving_right = False
@@ -250,7 +248,7 @@ class Scene():
 			self.moving = True
 		else: self.moving = False
 		
-		if self.ticks >= 15 and self.moving:
+		if self.ticks >= 6 and self.moving:
 			self.player.walk()
 			self.ticks = 0
 		self.ticks += 1
