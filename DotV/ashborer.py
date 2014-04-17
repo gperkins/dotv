@@ -1,4 +1,5 @@
 import pygame as p
+import math
 
 resdir = "valley_resources/"
 
@@ -21,7 +22,15 @@ class Player(p.sprite.Sprite):
 	def position(self):
 		return self.imgRect.midtop
 
-	def update(self, trans_x, direction):
+	def update(self):
+		pos = p.mouse.get_pos()
+		oldcenter = self.imgRect.center
+		angle = math.degrees(math.atan2(self.imgRect.centery-pos[1],-(self.imgRect.centerx-pos[0])))-90
+		self.img = p.transform.rotate(self.standing,angle)
+		self.imgRect = self.img.get_rect(center=oldcenter)
+		#self.imgRect.centerx += trans_x
+		
+	def move(self, trans_x):
 		self.imgRect.centerx += trans_x
 		
 	def walk(self):
@@ -153,8 +162,9 @@ class Scene():
 
 	def update(self):
 		self.enemies.update()
-		if self.moving_left: self.player.update(-self.movespeed, "left")
-		elif self.moving_right: self.player.update(self.movespeed, "right")
+		self.player.update()
+		if self.moving_left: self.player.move(-self.movespeed)
+		elif self.moving_right: self.player.move(self.movespeed)
 		if self.shoot:
 			if len(self.bullets.sprites()) < 4:
 				self.bullets.add(Bullet(self.player.position()))
