@@ -11,6 +11,7 @@ class Player(p.sprite.Sprite):
 		self.imgRect = self.img.get_rect()
 		self.imgRect.centery = 440
 		self.lastFoot = "left"
+		self.angle = 0
 
 	def draw(self, screen):
 		screen.blit(self.img, self.imgRect)
@@ -21,12 +22,15 @@ class Player(p.sprite.Sprite):
 	
 	def position(self):
 		return self.imgRect.midtop
+	
+	def angle(self):
+		return self.angle
 
 	def update(self):
 		pos = p.mouse.get_pos()
 		oldcenter = self.imgRect.center
-		angle = math.degrees(math.atan2(self.imgRect.centery-pos[1],-(self.imgRect.centerx-pos[0])))-90
-		self.img = p.transform.rotate(self.standing,angle)
+		self.angle = math.degrees(math.atan2(self.imgRect.centery-pos[1],-(self.imgRect.centerx-pos[0])))-90
+		self.img = p.transform.rotate(self.standing,self.angle)
 		self.imgRect = self.img.get_rect(center=oldcenter)
 		#self.imgRect.centerx += trans_x
 		
@@ -42,12 +46,16 @@ class Player(p.sprite.Sprite):
 			self.lastFoot = "left"
 
 class Bullet(p.sprite.Sprite):
-	def __init__(self, position):
+	def __init__(self, position, angle):
 		p.sprite.Sprite.__init__(self)
 		
-		self.speed = [0,-2]
+		self.speed = 5
+		self.moveVector = [self.speed*math.cos(math.radians(angle+90)),
+						-self.speed*math.sin(math.radians(angle+90))]
+		
 		
 		self.image = p.Surface([20,20])
+		self.image.set_colorkey((0,0,0))
 		p.draw.circle(self.image, ((255,0,255)), (10,10),10)
 		#p.draw.circle(self.image, self.color, (10,10),8)
 		
@@ -55,8 +63,12 @@ class Bullet(p.sprite.Sprite):
 		self.rect.center = position
 		self.ticks = 0
 		
-	def update(self):
-		self.rect = self.rect.move(self.speed)
+	def update(self, screen):
+		self.rect = self.rect.move(self.moveVector)
+		if not screen.get_rect().contains(self.rect):
+			self.kill()
+			
+		
 
 class Enemy(p.sprite.Sprite):
 
@@ -64,9 +76,7 @@ class Enemy(p.sprite.Sprite):
 		p.sprite.Sprite.__init__(self)
 		
 		self.speed = [0,5]
-		self.image = p.Surface([20,20])
-		p.draw.circle(self.image, ((255,255,255)), (10,10),10)
-		#p.draw.circle(self.image, self.color, (10,10),8)
+		self.image = p.image.load(resdir + "eab.png")
 		
 		self.rect = self.image.get_rect()
 		self.rect.center = position
@@ -107,12 +117,13 @@ def enemyBuild(enemies):
 		for _ in range(0,9):
 			enemies.add(Enemy((xpos, ypos)))
 			xpos += 75
-		ypos+=45
+		ypos+=55
 
 class Scene():
 	def __init__(self, screen):
 		self.running = True
 		self.screen = screen
+		self.bg = p.image.load(resdir+"bark.jpg")
 		
 		self.enemies = p.sprite.Group()
 		self.bullets = p.sprite.Group()
@@ -131,10 +142,9 @@ class Scene():
 			self.draw()
 		
 
-
-
 	def draw(self):
 		self.screen.fill((0,0,0))
+		self.screen.blit(self.bg, (0,0))
 		self.enemies.draw(self.screen)
 		self.player.draw(self.screen)
 		self.bullets.draw(self.screen)
@@ -146,30 +156,32 @@ class Scene():
 					p.display.quit()
 					exit()
 				if event.type == p.KEYUP:
-					if event.key == p.K_RIGHT: self.moving_right = False
-					if event.key == p.K_LEFT: self.moving_left = False
+					if event.key == p.K_d: self.moving_right = False
+					if event.key == p.K_a: self.moving_left = False
 				if event.type == p.KEYDOWN:
-					if event.key == p.K_RIGHT:
+					if event.key == p.K_d:
 						self.moving_right = True
 						self.last_move = "right"
-					elif event.key == p.K_LEFT:
+					elif event.key == p.K_a:
 						self.moving_left = True
 						self.last_move = "left"
-					elif event.key == p.K_SPACE:
-						self.shoot = True
 					elif event.key == p.K_TAB:
 						self.running = False
+				if event.type == p.MOUSEBUTTONDOWN:
+					if event.button == 1:
+						self.shoot = True
+					
 
 	def update(self):
 		self.enemies.update()
 		self.player.update()
 		if self.moving_left: self.player.move(-self.movespeed)
-		elif self.moving_right: self.player.move(self.movespeed)
+		if self.moving_right: self.player.move(self.movespeed)
 		if self.shoot:
 			if len(self.bullets.sprites()) < 4:
-				self.bullets.add(Bullet(self.player.position()))
+				self.bullets.add(Bullet(self.player.position(), self.player.angle))
 			self.shoot = False
-		self.bullets.update()
+		self.bullets.update(self.screen)
 		p.sprite.groupcollide(self.enemies, self.bullets, True, True)
 		
 
