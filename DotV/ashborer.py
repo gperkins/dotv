@@ -10,7 +10,6 @@ class Player(p.sprite.Sprite):
 		self.img = self.standing
 		self.imgRect = self.img.get_rect()
 		self.imgRect.centery = 440
-		self.lastFoot = "left"
 		self.angle = 0
 
 	def draw(self, screen):
@@ -37,13 +36,6 @@ class Player(p.sprite.Sprite):
 	def move(self, trans_x):
 		self.imgRect.centerx += trans_x
 		
-	def walk(self):
-		if self.lastFoot == "left":
-			self.img = self.rightFoot
-			self.lastFoot = "right"
-		else:
-			self.img = self.leftFoot
-			self.lastFoot = "left"
 
 class Bullet(p.sprite.Sprite):
 	def __init__(self, position, angle):
