@@ -8,33 +8,33 @@ class Player(p.sprite.Sprite):
 		p.sprite.Sprite.__init__(self)
 		self.standing = p.image.load(resdir+"defenderStand.png")
 		self.img = self.standing
-		self.imgRect = self.img.get_rect()
-		self.imgRect.centery = 440
+		self.rect = self.img.get_rect()
+		self.rect.centery = 440
 		self.angle = 0
 
 	def draw(self, screen):
-		screen.blit(self.img, self.imgRect)
+		screen.blit(self.img, self.rect)
 		
 	def inBounds(self, boundary):
-		#return boundary.contains(self.imgRect)
+		#return boundary.contains(self.rect)
 		return 1
 	
 	def position(self):
-		return self.imgRect.midtop
+		return self.rect.midtop
 	
 	def angle(self):
 		return self.angle
 
 	def update(self):
 		pos = p.mouse.get_pos()
-		oldcenter = self.imgRect.center
-		self.angle = math.degrees(math.atan2(self.imgRect.centery-pos[1],-(self.imgRect.centerx-pos[0])))-90
+		oldcenter = self.rect.center
+		self.angle = math.degrees(math.atan2(self.rect.centery-pos[1],-(self.rect.centerx-pos[0])))-90
 		self.img = p.transform.rotate(self.standing,self.angle)
-		self.imgRect = self.img.get_rect(center=oldcenter)
-		#self.imgRect.centerx += trans_x
+		self.rect = self.img.get_rect(center=oldcenter)
+		#self.rect.centerx += trans_x
 		
 	def move(self, trans_x):
-		self.imgRect.centerx += trans_x
+		self.rect.centerx += trans_x
 		
 
 class Bullet(p.sprite.Sprite):

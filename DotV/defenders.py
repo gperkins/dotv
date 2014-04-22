@@ -41,13 +41,13 @@ class Player(p.sprite.Sprite):
 		self.rightFoot = p.image.load(resdir+"defenderRight.png")
 		self.standing = p.image.load(resdir+"defenderStand.png")
 		self.img = self.standing
-		self.imgRect = self.img.get_rect()
+		self.rect = self.img.get_rect()
 		self.moving = False
 		self.lastFoot = "left"
 		self.lastDirection = "up"
 
 	def draw(self, screen):
-		screen.blit(self.img, self.imgRect)
+		screen.blit(self.img, self.rect)
 
 	def resetImage(self, direction):
 		self.leftFoot = p.image.load(resdir+"defenderLeft.png")
@@ -57,7 +57,7 @@ class Player(p.sprite.Sprite):
 		elif direction =="right": self.setImageDirection(270)
 		elif direction =="down": self.setImageDirection(180)
 		self.img = self.standing
-		self.imgRect = self.img.get_rect(center=self.imgRect.center)
+		self.rect = self.img.get_rect(center=self.rect.center)
 
 	def setImageDirection(self, degrees):
 		self.leftFoot = p.transform.rotate(self.leftFoot, degrees)
@@ -65,12 +65,12 @@ class Player(p.sprite.Sprite):
 		self.standing = p.transform.rotate(self.standing, degrees)
 		
 	def inBounds(self, boundary):
-		#return boundary.contains(self.imgRect)
+		#return boundary.contains(self.rect)
 		return 1
 
 	def update(self, trans_xy, direction):
-		self.imgRect.centerx += trans_xy[0]
-		self.imgRect.centery += trans_xy[1]
+		self.rect.centerx += trans_xy[0]
+		self.rect.centery += trans_xy[1]
 		if direction != self.lastDirection:
 			self.resetImage(direction)
 			self.lastDirection = direction
@@ -93,7 +93,18 @@ class Tile(p.sprite.Sprite):
 		self.pos = [x,y]
 		if (tileType == 0): self.img = self.grass
 		else: self.img = self.dirt
-		self.imgRect = self.img.get_rect()
+		self.rect = self.img.get_rect()
+		
+	def update(self, screen):
+		screen.blit(self.img, self.pos)
+		
+class gameStart(p.sprite.Sprite):
+	def __init__(self, img, position, gameStart):
+		p.sprite.Sprite.__init__(self)
+		self.img = p.image.load(resdir+img)
+		self.rect = self.img.get_rect()
+		self.pos = position
+		
 		
 	def update(self, screen):
 		screen.blit(self.img, self.pos)
@@ -116,6 +127,8 @@ class Scene():
 		p.init()
 		p.font.init()
 		self.boundary = p.Rect(0,0,width,height)
+		self.ashBorer = False
+		self.gameStarter = gameStart("tree.png", (400,300), self.ashBorer)
 		self.moving = False
 		self.moving_left = False
 		self.moving_right = False
@@ -200,7 +213,7 @@ class Scene():
 					if event.type == p.KEYDOWN: 
 						if event.key == p.K_SPACE: self.pause = False
 
-			while self.example:
+			while self.ashBorer:
 				s = ashborer.Scene(self.screen)
 				s.run()
 				self.example = False
@@ -235,6 +248,7 @@ class Scene():
 
 	def draw(self):
 		TileSet.update(self.screen)
+		self.gameStarter.update(self.screen)
 		self.player.draw(self.screen)
 	
 	def message(self, lines, popupfont):
@@ -246,6 +260,8 @@ class Scene():
 		p.display.flip()
 	
 	def update(self):
+		if p.sprite.collide_rect(self.player, self.gameStarter):
+			self.ashBorer = True
 		if self.moving_left or self.moving_right or self.moving_up or self.moving_down:
 			self.moving = True
 		else: self.moving = False

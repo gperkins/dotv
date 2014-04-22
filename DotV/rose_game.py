@@ -41,7 +41,7 @@ class Player(p.sprite.Sprite):
 		self.standing = p.image.load(dir+"defenderStand.png")
 		self.scene = scene
 		self.img = self.standing
-		self.imgRect = self.img.get_rect()
+		self.rect = self.img.get_rect()
 		self.moving = False
 		self.lastFoot = "left"
 		self.lastDirection = "down"
@@ -49,7 +49,7 @@ class Player(p.sprite.Sprite):
 		self.sprayTicks = 0
 
 	def draw(self, screen):
-		screen.blit(self.img, self.imgRect)
+		screen.blit(self.img, self.rect)
 
 	def resetImage(self, direction):
 		self.leftFoot = p.image.load(dir+"defenderLeft.png")
@@ -59,7 +59,7 @@ class Player(p.sprite.Sprite):
 		elif direction =="right": self.setImageDirection(270)
 		else: self.setImageDirection(180)
 		self.img = self.standing
-		self.imgRect = self.img.get_rect(center=self.imgRect.center)
+		self.rect = self.img.get_rect(center=self.rect.center)
 
 	def setImageDirection(self, degrees):
 		self.leftFoot = p.transform.rotate(self.leftFoot, degrees)
@@ -67,7 +67,7 @@ class Player(p.sprite.Sprite):
 		self.standing = p.transform.rotate(self.standing, degrees)
 
 	def update(self, trans_x, direction):
-		self.imgRect.centerx += trans_x
+		self.rect.centerx += trans_x
 		if self.shovelTicks > 0:
 			self.shovelTicks -= 1
 		if self.sprayTicks > 0:
@@ -86,16 +86,16 @@ class Player(p.sprite.Sprite):
 			
 	def shovel(self):
 		if self.shovelTicks == 0:
-			s = Shovel(self.imgRect.centerx - 10, self.imgRect.centery)
+			s = Shovel(self.rect.centerx - 10, self.rect.centery)
 			self.scene.shovel(s)
 			self.shovelTicks = 10
 			
 	def spray(self, dir):
 		if self.sprayTicks == 0:
 			if dir == 0:
-				s = Spray(self.imgRect.centerx - 50, self.imgRect.centery - 20, dir)
+				s = Spray(self.rect.centerx - 50, self.rect.centery - 20, dir)
 			else:
-				s = Spray(self.imgRect.centerx + 10, self.imgRect.centery - 10, dir)
+				s = Spray(self.rect.centerx + 10, self.rect.centery - 10, dir)
 			self.scene.spray(s)
 			self.sprayTicks = 10
 #20x20png		
@@ -119,7 +119,7 @@ class Vine(p.sprite.Sprite):
 			self.img = p.image.load(dir+"vine.png")
 		else:
 			self.img = p.image.load(dir+"rose.png")
-		self.imgRect = self.img.get_rect()
+		self.rect = self.img.get_rect()
 
 	def draw(self, screen):
 		screen.blit(self.img, self.pos)
@@ -171,7 +171,7 @@ class Shovel(p.sprite.Sprite):
 		self.pos = [x,y]
 		self.speed = 7
 		self.img = p.image.load(dir+"shovel.png")
-		self.imgRect = self.img.get_rect()
+		self.rect = self.img.get_rect()
 		self.ticks = 70
 
 	def draw(self, screen):
@@ -188,7 +188,7 @@ class Spray(p.sprite.Sprite):
 		self.pos = [x,y]
 		self.speed = 4
 		self.img = p.image.load(dir+"cloud.png")
-		self.imgRect = self.img.get_rect()
+		self.rect = self.img.get_rect()
 		self.direction = direction
 		self.ticks = 60
 
@@ -208,7 +208,7 @@ class Tile(p.sprite.Sprite):
 		self.pos = [x,y]
 		if (type == 0): self.img = p.image.load(dir+"grass.png")
 		else: self.img = p.image.load(dir+"dirt.png")
-		self.imgRect = self.img.get_rect()
+		self.rect = self.img.get_rect()
 		
 	def update(self, screen):
 		screen.blit(self.img, self.pos)
@@ -423,8 +423,8 @@ class Scene():
 			self.player.walk()
 			self.ticks = 0
 		self.ticks += 1
-		if self.moving_left and self.player.imgRect.centerx > 10: self.player.update(-self.movespeed, "left")
-		elif self.moving_right and self.player.imgRect.centerx < 630: self.player.update(self.movespeed, "right")
+		if self.moving_left and self.player.rect.centerx > 10: self.player.update(-self.movespeed, "left")
+		elif self.moving_right and self.player.rect.centerx < 630: self.player.update(self.movespeed, "right")
 		else: self.player.update(0, "down")
 		self.createVine()
 		for vine in self.vines:
