@@ -1,6 +1,7 @@
 import sys
 import pygame as p
 import ashborer
+import yellow2
 
 resdir = "valley_resources/"
 size = (width,height) = 640,480
@@ -98,16 +99,19 @@ class Tile(p.sprite.Sprite):
 	def update(self, screen):
 		screen.blit(self.img, self.pos)
 		
-class gameStart(p.sprite.Sprite):
-	def __init__(self, img, position, gameStart):
+class gameStarter(p.sprite.Sprite):
+	def __init__(self, img, position):
 		p.sprite.Sprite.__init__(self)
-		self.img = p.image.load(resdir+img)
-		self.rect = self.img.get_rect()
-		self.pos = position
+		self.image = p.image.load(resdir+img)
+		self.rect = self.image.get_rect()
+		self.rect.center = position
 		
+	def draw (self, screen):
+		screen.blit(self.image, self.rect)
 		
-	def update(self, screen):
-		screen.blit(self.img, self.pos)
+	def update (self, player):
+		return p.sprite.collide_rect(self,player)
+		
 
 
 TileSet = p.sprite.Group()      
@@ -128,7 +132,11 @@ class Scene():
 		p.font.init()
 		self.boundary = p.Rect(0,0,width,height)
 		self.ashBorer = False
-		self.gameStarter = gameStart("tree.png", (400,300), self.ashBorer)
+		self.ashBorerStart = gameStarter("tree.png", (550,400))
+		self.yellowFlag = False
+		self.yellowFlagStart = gameStarter("pond.png", (100,440))
+		self.multiRose = False
+		self.multiRoseStart = gameStarter("tree.png", (550,400))
 		self.moving = False
 		self.moving_left = False
 		self.moving_right = False
@@ -144,7 +152,6 @@ class Scene():
 # 		backgroundRect = background.get_rect()
 
 		self.player = Player()
-		
 		self.screen = p.display.set_mode(size)
 		
 		self.controls = True
@@ -216,7 +223,23 @@ class Scene():
 			while self.ashBorer:
 				s = ashborer.Scene(self.screen)
 				s.run()
-				self.example = False
+				self.ashBorer = False
+				self.moving_left = False
+				self.moving_right = False
+				self.moving_up = False
+				self.moving_down = False
+				self.player.rect.center = (550,280)
+				
+			while self.yellowFlag:
+				s = yellow2.Scene(self.screen)
+				s.run()
+				self.yellowFlag = False
+				self.moving_left = False
+				self.moving_right = False
+				self.moving_up = False
+				self.moving_down = False
+				self.player.rect.center = (550,280)
+					
 				
 			self.screen.fill(black)
 			#self.screen.blit(background, backgroundRect)
@@ -248,7 +271,8 @@ class Scene():
 
 	def draw(self):
 		TileSet.update(self.screen)
-		self.gameStarter.update(self.screen)
+		self.ashBorerStart.draw(self.screen)
+		self.yellowFlagStart.draw(self.screen)
 		self.player.draw(self.screen)
 	
 	def message(self, lines, popupfont):
@@ -260,8 +284,10 @@ class Scene():
 		p.display.flip()
 	
 	def update(self):
-		if p.sprite.collide_rect(self.player, self.gameStarter):
-			self.ashBorer = True
+		self.ashBorer = self.ashBorerStart.update(self.player)
+		self.yellowFlag = self.yellowFlagStart.update(self.player)
+		
+		
 		if self.moving_left or self.moving_right or self.moving_up or self.moving_down:
 			self.moving = True
 		else: self.moving = False

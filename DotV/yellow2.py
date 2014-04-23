@@ -12,14 +12,6 @@ white    = ( 255, 255, 255)
 skyBlue  = (  0,  191, 255)
 red      = ( 255,   0,   0)
 
-sound = mix.Sound(resdir + "background.wav")
-sound.play(-1)
-
-
-size = width, height = 640, 480
-
-screen = p.display.set_mode(size)
-screen.fill((255, 255, 255))
 
 p.display.set_caption('Yellow Flag Iris')
 
@@ -29,11 +21,8 @@ ground = p.image.load(resdir + "grassy.png")
 
 velocity = 9
 removeShot = False
-angle = 0
-done = False
 GRAVITY = .15
 clock = p.time.Clock()
-won = False
 
 
 class SprayGun(p.sprite.Sprite):
@@ -43,12 +32,11 @@ class SprayGun(p.sprite.Sprite):
         self.image = self.imageThing
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        angle = 0
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)        
 
-    def update(self):
+    def update(self, angle):
         oldCenter = self.rect.center
         self.image = p.transform.rotate(self.imageThing, angle)
         self.rect = self.image.get_rect()
@@ -68,7 +56,7 @@ class WaterShot(p.sprite.Sprite):
         self.yLength = 0
         self.speed = 0
         
-    def update(self):
+    def update(self, scene):
         self.speed -= GRAVITY
         self.rect.x = self.rect.x + self.xLength * velocity
         self.rect.y = self.rect.y - (self.speed)
@@ -77,8 +65,7 @@ class WaterShot(p.sprite.Sprite):
         if self.rect.x > 640 or self.rect.y > 480:
             self.rect.x = 43
             self.rect.y = 403
-            p.sprite.Group.remove(sprite_list, self)
-            p.sprite.Group.remove(watershot_list, self)
+            p.sprite.Group.remove(scene.watershot_list, self)
             
 
 class SmallTree(p.sprite.Sprite):
@@ -124,110 +111,125 @@ class YellowIris(p.sprite.Sprite):
             self.movingRight = True
             self.movingLeft = False
 
-    
-sprite_list = p.sprite.Group()
-watershot_list = p.sprite.Group()
-tree_list = p.sprite.Group()
-iris = YellowIris(600, 400)
-gun = SprayGun(43, 403)
-sprite_list.add(gun)
-sprite_list.add(iris)
-shot = WaterShot(velocity, 43, 403)
-smallTree = SmallTree(300,400)
-sprite_list.add(smallTree)
-tree_list.add(smallTree)
-smallTree2 = SmallTree(380, 380)
-sprite_list.add(smallTree2)
-tree_list.add(smallTree2)
-
-while won == False:
-    clock.tick(60)
-
-    if not watershot_list.has(shot):
-        shot.rect.x = 43
-        shot.rect.y = 403
-    
-    background = p.Surface(screen.get_size())
-    background.fill((255,255,255))
-    keys = p.key.get_pressed()
-    if keys[p.K_UP] and angle < 90:
-        angle = angle + 1
-    if keys[p.K_DOWN] and angle > 0:
-        angle = angle - 1
-    if keys[p.K_SPACE]:
-        if not sprite_list.has(shot):
-            shot.angleFinder = math.tan(math.radians(angle))
-
-            if angle < 45:
-                shot.yLength = shot.angleFinder
-                shot.xLength = 1
-            else:
-                shot.yLength = 1
-                shot.xLength = 1/shot.angleFinder
-
-            shot.speed = shot.yLength * velocity
-            sprite_list.add(shot)
-            watershot_list.add(shot)
-            
-    irisCollide = p.sprite.spritecollide(iris, watershot_list, False)
-    count = 0
-    for collision in irisCollide:
-        count += 1
-    if count > 0:
-        watershot_list.remove(shot)
-        won = True
-    if watershot_list.has(shot):    
-        treeCollide = p.sprite.spritecollide(shot, tree_list, False)
-        count1 = 0
-        for collision in treeCollide:
-            count += 1
-        if count > 0:
-            watershot_list.remove(shot)
-    
-    for event in p.event.get():
-        if event.type == p.QUIT:
-            p.quit()
+class Scene():
+    def __init__(self, screen):
+        self.sprite_list = p.sprite.Group()
+        self.watershot_list = p.sprite.Group()
+        self.tree_list = p.sprite.Group()
+        self.iris = YellowIris(600, 400)
+        self.gun = SprayGun(43, 403)
+        self.sprite_list.add(self.iris)
+        self.shot = WaterShot(velocity, 43, 403)
+        smallTree = SmallTree(300,400)
+        self.sprite_list.add(smallTree)
+        self.tree_list.add(smallTree)
+        smallTree2 = SmallTree(380, 380)
+        self.sprite_list.add(smallTree2)
+        self.tree_list.add(smallTree2)
+        self.done = False
+        self.won = False
+        self.angle = 0
         
-
-    sprite_list.clear(screen, background)
-    screen.blit(sky, (0,0))
-    screen.blit(ground, (0,400))
-    sprite_list.update()
-    sprite_list.draw(screen)
-
-    player = p.image.load(resdir + "defenderSide.png")
-    screen.blit(player, (20, 380))
-
-    p.display.flip()
-
-
-while done == False:
-    for event in p.event.get():
-            if event.type == p.QUIT:
+        self.screen = screen
+    
+    def run(self):
+        while self.won == False:
+            clock.tick(60)
+        
+            if not self.watershot_list.has(self.shot):
+                self.shot.rect.x = 43
+                self.shot.rect.y = 403
+            
+            background = p.Surface(self.screen.get_size())
+            background.fill((255,255,255))
+            keys = p.key.get_pressed()
+            if keys[p.K_UP] and self.angle < 90:
+                self.angle = self.angle + 1
+            if keys[p.K_DOWN] and self.angle > 0:
+                self.angle = self.angle - 1
+            if keys[p.K_SPACE]:
+                if not self.watershot_list.has(self.shot):
+                    self.shot.angleFinder = math.tan(math.radians(self.angle))
+        
+                    if self.angle < 45:
+                        self.shot.yLength = self.shot.angleFinder
+                        self.shot.xLength = 1
+                    else:
+                        self.shot.yLength = 1
+                        self.shot.xLength = 1/self.shot.angleFinder
+        
+                    self.shot.speed = self.shot.yLength * velocity
+                    self.watershot_list.add(self.shot)
+                    
+            irisCollide = p.sprite.spritecollide(self.iris, self.watershot_list, False)
+            count = 0
+            for collision in irisCollide:
+                count += 1
+            if count > 0:
+                self.watershot_list.remove(self.shot)
+                won = True
+            if self.watershot_list.has(self.shot):    
+                treeCollide = p.sprite.spritecollide(self.shot, self.tree_list, False)
+                count1 = 0
+                for collision in treeCollide:
+                    count += 1
+                if count > 0:
+                    self.watershot_list.remove(self.shot)
+            
+            for event in p.event.get():
+                if event.type == p.QUIT:
+                    p.quit()
+                
+        
+            self.sprite_list.clear(self.screen, background)
+            self.screen.blit(sky, (0,0))
+            self.screen.blit(ground, (0,400))
+            self.sprite_list.update()
+            self.gun.update(self.angle)
+            self.watershot_list.update(self)
+            
+            self.gun.draw(self.screen)
+            self.watershot_list.draw(self.screen)
+            self.sprite_list.draw(self.screen)
+        
+            player = p.image.load(resdir + "defenderSide.png")
+            self.screen.blit(player, (20, 380))
+        
+            p.display.flip()
+        
+        
+        while self.done == False:
+            for event in p.event.get():
+                    if event.type == p.QUIT:
+                        p.quit()
+        
+            keys = p.key.get_pressed()
+            if keys[p.K_q]:
                 p.quit()
-
-    keys = p.key.get_pressed()
-    if keys[p.K_q]:
+        
+            font = p.font.SysFont("comicsansms", 72)
+            text = font.render("YOU WON!!", True, (0, 128, 0))
+            font2 = p.font.SysFont("comicsansms", 30)
+            text2 = font2.render("Press Q to return to main screen", True, (0, 128, 0))
+            self.screen.blit(text, (150, 200))
+            self.screen.blit(text2, (150, 280))
+        
+            self.sprite_list.clear(self.screen, background)
+            self.screen.blit(sky, (0,0))
+            self.screen.blit(ground, (0,400))
+            self.sprite_list.update()
+            self.sprite_list.draw(self.screen)
+        
+            self.screen.blit(text, (150, 200))
+            self.screen.blit(text2, (150, 280))
+        
+            player = p.image.load(resdir + "defenderSide.png")
+            self.screen.blit(player, (20, 380))
+            p.display.flip()
+        
         p.quit()
-
-    font = p.font.SysFont("comicsansms", 72)
-    text = font.render("YOU WON!!", True, (0, 128, 0))
-    font2 = p.font.SysFont("comicsansms", 30)
-    text2 = font2.render("Press Q to return to main screen", True, (0, 128, 0))
-    screen.blit(text, (150, 200))
-    screen.blit(text2, (150, 280))
-
-    sprite_list.clear(screen, background)
-    screen.blit(sky, (0,0))
-    screen.blit(ground, (0,400))
-    sprite_list.update()
-    sprite_list.draw(screen)
-
-    screen.blit(text, (150, 200))
-    screen.blit(text2, (150, 280))
-
-    player = p.image.load(resdir + "defenderSide.png")
-    screen.blit(player, (20, 380))
-    p.display.flip()
-
-p.quit()
+        
+if __name__ == '__main__':
+    screen = p.display.set_mode((640,480))
+    s = Scene(screen)
+    s.run()        

@@ -148,20 +148,14 @@ class Scene():
 					p.display.quit()
 					exit()
 				if event.type == p.KEYUP:
-					if event.key == p.K_d: self.moving_right = False
-					if event.key == p.K_a: self.moving_left = False
+					if event.key == p.K_RIGHT: self.moving_right = False
+					if event.key == p.K_LEFT: self.moving_left = False
 				if event.type == p.KEYDOWN:
-					if event.key == p.K_d:
-						self.moving_right = True
-						self.last_move = "right"
-					elif event.key == p.K_a:
-						self.moving_left = True
-						self.last_move = "left"
-					elif event.key == p.K_TAB:
-						self.running = False
+					if event.key == p.K_RIGHT: self.moving_right = True
+					elif event.key == p.K_LEFT: self.moving_left = True
+					elif event.key == p.K_TAB: self.running = False
 				if event.type == p.MOUSEBUTTONDOWN:
-					if event.button == 1:
-						self.shoot = True
+					if event.button == 1: self.shoot = True
 					
 
 	def update(self):
