@@ -6,7 +6,6 @@ import math
 dir = "valley_resources/"
 size = (width,height) = 640,480
 black = 0,0,0
-run = 1
 
 tileArray = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -225,7 +224,7 @@ def tileBuild(tiles, screen):
 		ypos+=20
 		
 class Scene():
-	def __init__(self):
+	def __init__(self, screen):
 	
 		p.init()
 		p.font.init()
@@ -243,8 +242,9 @@ class Scene():
 
 		self.player = Player(self)
 		
-		self.screen = p.display.set_mode(size)
+		self.screen = screen
 		
+		self.running = 1
 		self.controls = True
 		self.gameover = False
 		self.pause = False
@@ -252,9 +252,10 @@ class Scene():
 		
 		self.ticks = 0
 		
+	def run(self):
 		tileBuild(tileArray, self.screen)
-		
 		while self.controls:
+			self.screen.fill((0,0,0))
 			lines = ["Multiflora Rose Removal","Keep the roses from taking over, to win.",""
 					,"Throw shovels down to destroy the roses, as they grow",
 					"spray the roses with pesticide to combat them if", "they reach the surface",""
@@ -269,7 +270,7 @@ class Scene():
 					if event.key == p.K_SPACE: self.controls = False
 					
 				
-		while run:
+		while self.running:
 			p.time.Clock().tick(120)
 			while self.gameover:
 				lines = [" Game Over "," Press space to try again. "]
@@ -280,6 +281,7 @@ class Scene():
 						if event.key == p.K_SPACE:
 							self.reset()
 							self.gameover = False
+
 							
 			while self.win:
 				lines = [" Congratulations!!! "," You have defended the valley from the Multi Flora Rose. "]
@@ -299,6 +301,8 @@ class Scene():
 					if event.key == p.K_RIGHT: self.moving_right = False
 					if event.key == p.K_LEFT: self.moving_left = False
 				if event.type == p.KEYDOWN:
+					if event.key == p.K_TAB:
+						self.running = False
 					if event.key == p.K_RIGHT:
 						self.moving_right = True
 						self.last_move = "right"
@@ -320,7 +324,7 @@ class Scene():
 				lines = [" - PAUSED - "," Press space to resume. "]
 				self.message(lines, p.font.SysFont("Arial", 28, False, False))
 				for event in p.event.get():
-					if event.type == p.QUIT: sys.exit()
+					if event.type == p.QUIT: exit()
 					if event.type == p.KEYDOWN: 
 						if event.key == p.K_SPACE: self.pause = False
 						
@@ -328,7 +332,7 @@ class Scene():
 			#self.screen.blit(background, backgroundRect)
 			
 			self.draw()
-	    
+		
 			if p.font:
 				bigfont = p.font.SysFont("Arial", 32, True, False)
 				lilfont = p.font.SysFont("Arial", 18, False, False)
@@ -336,7 +340,7 @@ class Scene():
 				(cornerwidth, cornerheight) = [10,5]
 				
 			p.display.flip()
-	    
+		
 			self.update()		
 	
 	def reset(self):
@@ -434,4 +438,6 @@ class Scene():
 		
 
 if __name__ == '__main__':
-    s = Scene()
+	screen = p.display.set_mode((640,480))
+	s = Scene(screen)
+	s.run()		

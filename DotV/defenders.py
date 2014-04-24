@@ -2,6 +2,7 @@ import sys
 import pygame as p
 import ashborer
 import yellow2
+import rose_game
 
 resdir = "valley_resources/"
 size = (width,height) = 640,480
@@ -136,7 +137,7 @@ class Scene():
 		self.yellowFlag = False
 		self.yellowFlagStart = gameStarter("pond.png", (100,440))
 		self.multiRose = False
-		self.multiRoseStart = gameStarter("tree.png", (550,400))
+		self.multiRoseStart = gameStarter("bush.png", (550,100))
 		self.moving = False
 		self.moving_left = False
 		self.moving_right = False
@@ -228,7 +229,7 @@ class Scene():
 				self.moving_right = False
 				self.moving_up = False
 				self.moving_down = False
-				self.player.rect.center = (550,280)
+				self.player.rect.center = (550,270)
 				
 			while self.yellowFlag:
 				s = yellow2.Scene(self.screen)
@@ -238,26 +239,24 @@ class Scene():
 				self.moving_right = False
 				self.moving_up = False
 				self.moving_down = False
-				self.player.rect.center = (550,280)
+				self.player.rect.center = (100,320)
+				
+			while self.multiRose:
+				s = rose_game.Scene(self.screen)
+				s.run()
+				self.multiRose = False
+				self.moving_left = False
+				self.moving_right = False
+				self.moving_up = False
+				self.moving_down = False
+				self.player.rect.center = (430,100)
 					
 				
 			self.screen.fill(black)
 			#self.screen.blit(background, backgroundRect)
 			
 			self.draw()
-# 			if p.font:
-# 				bigfont = p.font.SysFont("Arial", 32, True, False)
-# 				lilfont = p.font.SysFont("Arial", 18, False, False)
-# 				level = bigfont.render("Level: "+str(self.level), 1, (238, 221, 130))
-# 				score = bigfont.render("Score: "+str(self.score), 1, (255, 255, 255))
-# 				hiscore = lilfont.render("Hiscore: "+str(self.hiscore), 1, (255, 255, 255))
-#    		
-# 				(cornerwidth, cornerheight) = [10,5]
-#    		
-# 				self.screen.blit(level, [width-135,height-50])
-# 				self.screen.blit(score, [cornerwidth,cornerheight])
-# 				self.screen.blit(hiscore, [cornerwidth,cornerheight+35])
-				
+
 			p.display.flip()
 			self.update()
 			
@@ -268,11 +267,14 @@ class Scene():
 		self.moving_right = False
 		self.moving_up = False
 		self.moving_down = False
+		
+	
 
 	def draw(self):
 		TileSet.update(self.screen)
 		self.ashBorerStart.draw(self.screen)
 		self.yellowFlagStart.draw(self.screen)
+		self.multiRoseStart.draw(self.screen)
 		self.player.draw(self.screen)
 	
 	def message(self, lines, popupfont):
@@ -286,6 +288,7 @@ class Scene():
 	def update(self):
 		self.ashBorer = self.ashBorerStart.update(self.player)
 		self.yellowFlag = self.yellowFlagStart.update(self.player)
+		self.multiRose = self.multiRoseStart.update(self.player)
 		
 		
 		if self.moving_left or self.moving_right or self.moving_up or self.moving_down:

@@ -113,7 +113,9 @@ def enemyBuild(enemies):
 
 class Scene():
 	def __init__(self, screen):
+		p.init()
 		self.running = True
+		self.incontrols = True
 		self.screen = screen
 		self.bg = p.image.load(resdir+"bark.jpg")
 		
@@ -127,6 +129,8 @@ class Scene():
 
 	def run(self):
 		enemyBuild(self.enemies)
+		while self.incontrols:
+			self.controls()
 		while self.running:
 			p.time.Clock().tick(60)
 			self.events()
@@ -141,6 +145,20 @@ class Scene():
 		self.player.draw(self.screen)
 		self.bullets.draw(self.screen)
 		p.display.flip()
+		
+	def controls(self):
+		self.screen.fill((0,0,0))
+		lines = ["Wipe out the Emerald Ash Borers","Keep the invading EABs from taking over the tree to win.",""
+				,"Move left and Right and point and click to shoot",""
+				,"Arrow Keys: Move Hero","Mouse: Aim    Click: Shoot    ESC: Pause","",
+				"Press spacebar to start."]
+		self.message(lines, p.font.SysFont("Arial", 28, False, False))
+		for event in p.event.get():
+			if event.type == p.QUIT:
+				p.display.quit()
+				self.running = False
+			if event.type == p.KEYDOWN:
+				if event.key == p.K_SPACE: self.incontrols = False
 
 	def events(self):
 		for event in p.event.get():
@@ -169,6 +187,14 @@ class Scene():
 			self.shoot = False
 		self.bullets.update(self.screen)
 		p.sprite.groupcollide(self.enemies, self.bullets, True, True)
+		
+	def message(self, lines, popupfont):
+		items = 1
+		for item in lines:
+			line = popupfont.render(str(item), 1, (238, 221, 130), (0,0,0))
+			self.screen.blit(line, (line.get_rect(center=(self.screen.get_width()/2,(self.screen.get_height()/10)+popupfont.get_linesize()*items)))) #this lines up multiple lines of text and centers it (somewhat)
+			items += 1 
+		p.display.flip()
 		
 
 		
